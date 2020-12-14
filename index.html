@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Display a map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+<script src="https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v1.8.1/mapbox-gl.css" rel="stylesheet" />
+<style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    h2,
+    h3 {
+      margin: 10px;
+      font-size: 1.2em;
+    }
+    h3 {
+      font-size: 1em;
+    }
+    p {
+      font-size: 0.85em;
+      margin: 10px;
+      text-align: left;
+    }
+    .map-overlay {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.8);
+      margin-right: 20px;
+      font-family: Arial, sans-serif;
+      overflow: auto;
+      border-radius: 3px;
+    }
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    #features {
+      top: 0;
+      height: 200px;
+      margin-top: 20px;
+      width: 250px;
+    }
+    #legend {
+      padding: 10px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+      line-height: 18px;
+      height: 150px;
+      margin-bottom: 40px;
+      width: 210px;
+    }
+    .legend-key {
+      display: inline-block;
+      border-radius: 20%;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+    }
+</style>
+</head>
+<body>
+  <div id="map"></div>
+  <div class="map-overlay" id="features">
+    <h2>Cooling Centers, Spraygrounds, and Pools</h2>
+    <div id="pd"><p>Locations of public spraygrounds, pools, cooling centers, and proposed cooling centers in relation to street trees over residential land use within Philadelphia. (Zoom in to see street tree points)</p></div>
+  </div>
+  <div class="map-overlay" id="legend"></div>
+<script>
+  mapboxgl.accessToken = 'pk.eyJ1Ijoid2lsbHN0dTIwIiwiYSI6ImNraDZoemE4dDAwZWYyeHBkNjIwM21kYmkifQ.lXC0r0cvWWB9e2yR1Iok3Q'; // put your token here.
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/willstu20/ckhrrdn3r1oye19koemu6bhcz',
+    zoom: 10,
+    center: [-75.150996, 39.992945]
+  });
+// add legend to your map
+    var layers = ['Existing Cooling Centers', 'Proposed Cooling Centers', 'PPR Spraygrounds', 'PPR Swimming Pools', 'Street Trees', 'Residential Buildings'];
+    var colors = ['#faa652', '#f6fa33', '#d7191c', '#2b83ba', '#3cdd27', '#d20dd9'];
+    for (i = 0; i < layers.length; i++) {
+      var layer = layers[i];
+      var color = colors[i];
+      var item = document.createElement('div');
+      var key = document.createElement('span');
+      key.className = 'legend-key';
+      key.style.backgroundColor = color;
+    var value = document.createElement('span');
+      value.innerHTML = layer;
+      item.appendChild(key);
+      item.appendChild(value);
+      legend.appendChild(item);
+    }
+    map.on('load', function() {
+      map.getCanvas().style.cursor = 'default';
+      map.fitBounds([
+          [-75.299998, 40.091772],
+          [-75.011607, 39.884492]
+        ]);
+        
+        // change info window on hover
+        map.on('mousemove', function(e) {
+          let states = map.queryRenderedFeatures(e.point, {
+            layers: ['Proposed Cooling Centers'] // get from the mapbox top left layer information
+          });
+          if (states.length) {
+          console.log(states[0]);
+          document.getElementById('pd').innerHTML =
+              '<h3><strong>' + states[0].properties.address + //'Cooling Centers, Spraygrounds, and Pools' +
+              // states[0].properties.fid + 
+               '</strong></h3><p><strong><em>' 
+          return;
+          } 
+
+          states = map.queryRenderedFeatures(e.point, {
+            layers: ['Existing Cooling Centers'] });
+          
+          if (states.length) {
+          console.log(states[0]);
+          document.getElementById('pd').innerHTML =
+              '<h3><strong>' + states[0].properties.location1 + //'Cooling Centers, Spraygrounds, and Pools' +
+              // states[0].properties.fid + 
+               '</strong></h3><p><strong><em>' 
+          return;
+          }
+
+          states = map.queryRenderedFeatures(e.point, {
+            layers: ['PPR Spraygrounds'] });
+          
+          if (states.length) {
+          console.log(states[0]);
+          document.getElementById('pd').innerHTML =
+              '<h3><strong>' + states[0].properties.PARK_NAME + //'Cooling Centers, Spraygrounds, and Pools' +
+              // states[0].properties.fid + 
+               '</strong></h3><p><strong><em>' 
+          return;
+          } 
+
+          states = map.queryRenderedFeatures(e.point, {
+            layers: ['PPR Swimming Pools'] });
+          
+          if (states.length) {
+          console.log(states[0]);
+          document.getElementById('pd').innerHTML =
+              '<h3><strong>' + states[0].properties.AMENITY_NAME + //'Cooling Centers, Spraygrounds, and Pools' +
+              // states[0].properties.fid + 
+               '</strong></h3><p><strong><em>' 
+          return;
+          }          
+          if (states.length > 0) {
+            // document.getElementById('pd').innerHTML =
+            //   '<h3><strong>' + states[0].properties.title + //'Cooling Centers, Spraygrounds, and Pools' +
+            //   // states[0].properties.fid + 
+            //    '</strong></h3><p><strong><em>' 
+              //+
+              //states[0].properties.landuse; 
+
+          
+          } else {
+            document.getElementById('pd').innerHTML =
+              '<p>Locations of public spraygrounds, pools, cooling centers, and proposed cooling centers in relation to street trees over residential land use within Philadelphia. (Zoom in to see street tree points)</p>';
+          }
+        });
+    });
+    //     // change info window on hover
+    //     map.on('mousemove', function(e) {
+    //       var states = map.queryRenderedFeatures(e.point, {
+    //         layers: ['Proposed Cooling Centers'] // get from the mapbox top left layer information
+    //       });
+        
+
+    //       if (states.length > 0) {
+    //         document.getElementById('pd').innerHTML =
+    //           '<h3><strong>' + states[0].properties.address +//'Cooling Centers, Spraygrounds, and Pools' +
+    //           // states[0].properties.fid + 
+    //            '</strong></h3><p><strong><em>' 
+    //           //+
+    //           //states[0].properties.landuse; 
+
+          
+    //       } else {
+    //         document.getElementById('pd').innerHTML =
+    //           '<p>Locations of public spraygrounds, pools, cooling centers, and proposed cooling centers in relation to street trees over residential land use within Philadelphia. (Zoom in to see street tree points)</p>';
+    //       }
+    //     });
+    // });
+
+
+        
+</script>
+</body>
+</html>
